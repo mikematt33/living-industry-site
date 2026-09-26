@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffb128">
+  <meta name="description" content="Report a bug, suggest an idea, and follow community feedback for Living Industry, a Game Dev Tycoon mod.">
+  <title>Living Industry — Community feedback</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to feedback</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="./" aria-label="Living Industry home"><span class="brand-mark" aria-hidden="true">li<span>.</span></span><span>Living Industry<small>A GAME DEV TYCOON MOD</small></span></a>
+      <nav aria-label="Main navigation">
+        <a href="https://github.com/mikematt33/gdt-livingindustry/blob/main/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a>
+        <a href="https://github.com/mikematt33/gdt-livingindustry" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        <div class="download-group"><a class="download" href="https://github.com/mikematt33/gdt-livingindustry/releases/latest" target="_blank" rel="noopener noreferrer">Download mod <span aria-hidden="true">↓</span></a><span class="release-info"><span id="release-version" hidden></span><a id="release-notes" href="https://github.com/mikematt33/gdt-livingindustry/releases" target="_blank" rel="noopener noreferrer">Release history ↗</a></span></div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell">
+    <section class="intro" aria-labelledby="page-heading">
+      <p class="eyebrow">BUILT WITH YOUR FEEDBACK</p>
+      <h1 id="page-heading">Help shape the next run.</h1>
+      <p class="mod-description">Shifting markets. Rival studios. A different industry every run. Living Industry brings a changing game market to Game Dev Tycoon.</p>
+      <a class="mobile-feedback text-button" href="#feedback-form">Share feedback <span aria-hidden="true">↓</span></a>
+    </section>
+
+    <div class="workspace">
+      <section class="board" aria-labelledby="board-heading">
+        <div class="section-heading"><div><h2 id="board-heading">Community feedback</h2><p>Check what’s been reported, or share something new.</p></div><button id="refresh" class="icon-button" type="button" aria-label="Refresh feedback" title="Refresh feedback">↻</button></div>
+        <div class="board-tools">
+          <div class="filters" role="group" aria-label="Feedback type">
+            <button class="filter active" type="button" data-filter="all" aria-pressed="true">All</button>
+            <button class="filter" type="button" data-filter="bug" aria-pressed="false">Bugs</button>
+            <button class="filter" type="button" data-filter="idea" aria-pressed="false">Ideas</button>
+          </div>
+          <label class="status-filter"><span class="visually-hidden">Issue status</span><select id="status-filter"><option value="open">Open</option><option value="closed">Closed</option><option value="all">All statuses</option></select></label>
+        </div>
+        <label class="search"><span aria-hidden="true">⌕</span><span class="visually-hidden">Search loaded feedback</span><input id="search" type="search" placeholder="Search feedback…" autocomplete="off"></label>
+        <div id="board-message" class="board-message" role="status" aria-live="polite">Loading feedback from GitHub…</div>
+        <div id="issue-list" class="issue-list"></div>
+        <div id="board-empty" class="empty-state" hidden><span class="empty-symbol" aria-hidden="true">＋</span><h3 id="empty-title">The board is open.</h3><p id="empty-description">Be the first to report a bug or share an idea for Living Industry.</p><button id="empty-action" class="text-button" type="button">Share feedback <span aria-hidden="true">→</span></button></div>
+        <div class="board-bottom"><span id="sync-status">One board, shared with GitHub Issues.</span><button id="load-more" class="text-button" type="button" hidden>Load more</button></div>
+        <a class="github-board-link" href="https://github.com/mikematt33/gdt-livingindustry/issues" target="_blank" rel="noopener noreferrer">View the board on GitHub <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <aside class="submission" aria-labelledby="form-heading">
+        <div class="form-header"><span class="eyebrow">YOUR NEXT GOOD IDEA</span><h2 id="form-heading">Share your feedback</h2><p>Small details make a big difference.</p></div>
+        <form id="feedback-form">
+          <fieldset class="type-picker"><legend class="visually-hidden">What would you like to share?</legend><label><input type="radio" name="kind" value="bug" checked><span>Report a bug</span></label><label><input type="radio" name="kind" value="idea"><span>Suggest an idea</span></label></fieldset>
+          <div class="field"><label for="title">Short title <span class="required-note">required</span></label><input id="title" name="title" required minlength="3" maxlength="120" placeholder="What’s happening?"></div>
+          <div id="similar-feedback" class="similar-feedback" hidden><p id="similar-summary" role="status" aria-live="polite"></p><div id="similar-list"></div><small>Matches from loaded feedback. Open a report to check whether it’s the same issue.</small></div>
+          <div class="field"><label id="details-label" for="details">What happened? <span class="required-note">required</span></label><p id="details-help" class="field-help">What were you doing, what went wrong, and what did you expect?</p><textarea id="details" name="details" rows="6" required minlength="10" maxlength="6000" aria-describedby="details-help" placeholder="Include steps to repeat it, if you can."></textarea></div>
+          <div id="version-field" class="field"><label for="version">Mod version <span class="optional-note">optional</span></label><input id="version" name="version" maxlength="40" placeholder="e.g. 0.1.1, or leave blank"></div>
+          <details id="bug-context" class="bug-context"><summary>Add bug details <span>optional</span></summary><div class="field"><label for="steps">Steps to reproduce</label><textarea id="steps" name="steps" rows="3" maxlength="2000" placeholder="1. Load a save&#10;2. Open…" aria-describedby="steps-help"></textarea><small id="steps-help">Up to 2,000 characters.</small></div><div class="field"><label for="expected">What did you expect?</label><textarea id="expected" name="expected" rows="2" maxlength="1000" placeholder="What should have happened?" aria-describedby="expected-help"></textarea><small id="expected-help">Up to 1,000 characters.</small></div><div class="field"><label for="other-mods">Other installed mods</label><input id="other-mods" name="otherMods" maxlength="500" placeholder="List them, or enter None" aria-describedby="mods-help"><small id="mods-help">Up to 500 characters. You can add screenshots and logs on GitHub.</small></div></details>
+          <p class="handoff-note">You’ll review and submit on GitHub. A GitHub account is needed, and your report will be public.</p>
+          <button id="submit-feedback" class="submit-button" type="submit">Continue on GitHub <span aria-hidden="true">↗</span></button>
+          <div id="form-message" class="form-message" role="status" aria-live="polite"></div>
+          <div id="long-report" class="long-report" hidden><p>Your report is too long to send in a link. Copy it below, then paste it into the GitHub description.</p><textarea id="prepared-body" readonly rows="5" aria-label="Complete report text to copy"></textarea><div><button id="copy-report" class="text-button" type="button">Copy report</button><a id="open-long-report" target="_blank" rel="noopener noreferrer">Continue on GitHub ↗</a></div></div>
+        </form>
+        <div class="form-tip"><strong>A quick tip</strong><p id="form-tip">Check the board first. If someone reported the same problem, add your details to their GitHub discussion.</p></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer"><span>Living Industry <span aria-hidden="true">/</span> An independent Game Dev Tycoon mod.</span><span>Made by <a href="https://github.com/mikematt33" target="_blank" rel="noopener noreferrer">mikematt33</a></span></footer>
+
+  <dialog id="issue-dialog" aria-labelledby="issue-heading"><div class="dialog-top"><span id="issue-meta" class="issue-meta"></span><button id="close-issue" class="icon-button" type="button" aria-label="Close feedback details">×</button></div><h2 id="issue-heading"></h2><p id="issue-author" class="issue-author"></p><div id="issue-body" class="issue-body"></div><div class="dialog-footer"><span id="issue-replies"></span><a id="issue-github" class="submit-button" target="_blank" rel="noopener noreferrer">Discuss on GitHub <span aria-hidden="true">↗</span></a></div></dialog>
+  <noscript><p class="noscript-note">This board needs JavaScript. You can <a href="https://github.com/mikematt33/gdt-livingindustry/issues">read or submit feedback directly on GitHub</a>.</p></noscript>
+</body>
+</html>
