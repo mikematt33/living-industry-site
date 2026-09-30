@@ -127,7 +127,8 @@ async function loadIssues({ more = false } = {}) {
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
     const response = await fetch(`${API_URL}/issues?state=all&sort=created&direction=desc&per_page=50&page=${page}`, {
-      headers: { Accept: 'application/vnd.github+json' }, signal: controller.signal
+      // GitHub responses may be cached for a minute; Refresh must check current reports.
+      cache: 'no-store', headers: { Accept: 'application/vnd.github+json' }, signal: controller.signal
     });
     if (!response.ok) {
       if (response.status === 403 || response.status === 429) throw new Error('GitHub is limiting requests for now. Please try again later or open the board on GitHub.');
