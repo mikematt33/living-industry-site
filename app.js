@@ -44,7 +44,7 @@ function renderSimilar() {
 let similarTimer;
 $('#title').addEventListener('input', () => { clearTimeout(similarTimer); similarTimer = setTimeout(renderSimilar, 250); });
 
-// Decorative draft feedback, never a submission confirmation.
+// Floating bug/idea icons shown when the type changes or a draft is prepared.
 const bubbleIcons = {
   bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 5 7 3m8 2 2-2M8 10H4m12 0h4M8 14H3m13 0h5M8 18l-3 2m11-2 3 2"/><rect x="8" y="7" width="8" height="14" rx="4"/><path d="M10 7V5h4v2m-2 4v7"/></svg>',
   idea: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Zm1 6h6m-5 2h4m-2-6v-5m-2-1 2 1 2-1"/></svg>'
@@ -127,7 +127,7 @@ async function loadIssues({ more = false } = {}) {
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
     const response = await fetch(`${API_URL}/issues?state=all&sort=created&direction=desc&per_page=50&page=${page}`, {
-      // GitHub responses may be cached for a minute; Refresh must check current reports.
+      // Skip the HTTP cache so Refresh picks up issues filed in the last minute.
       cache: 'no-store', headers: { Accept: 'application/vnd.github+json' }, signal: controller.signal
     });
     if (!response.ok) {
@@ -143,7 +143,7 @@ async function loadIssues({ more = false } = {}) {
     state.hasMore = !!response.headers.get('link')?.includes('rel="next"');
     state.loaded = true;
     state.syncedAt = Date.now();
-    try { sessionStorage.setItem(cacheKey, JSON.stringify({ issues: state.issues, page, hasMore: state.hasMore, syncedAt: state.syncedAt })); } catch { /* The live board works without browser caching. */ }
+    try { sessionStorage.setItem(cacheKey, JSON.stringify({ issues: state.issues, page, hasMore: state.hasMore, syncedAt: state.syncedAt })); } catch { /* sessionStorage blocked or full */ }
     showBoardMessage('');
   } catch (error) {
     const message = error.name === 'AbortError' ? 'GitHub took too long to respond. Please try again or open the board on GitHub.' : error.message;
@@ -155,13 +155,28 @@ async function loadIssues({ more = false } = {}) {
   }
 }
 
+// Turns the "### Heading" and "---" lines written by the form into elements.
+// Everything else goes through textContent, so an issue body can't inject HTML.
+function formatIssueBody(body) {
+  const text = String(body || '').replace(/\r\n?/g, '\n').trim();
+  if (!text) return [textElement('p', 'No additional details were provided.')];
+  return text.split(/\n{2,}/).flatMap(block => {
+    const heading = block.match(/^#{1,6}\s+(.+)$/s);
+    if (heading && !heading[1].includes('\n')) return [textElement('h3', heading[1].trim())];
+    const rule = block.match(/^(?:-{3,}|\*{3,}|_{3,})(?:\n|$)/);
+    if (!rule) return [textElement('p', block)];
+    const rest = block.slice(rule[0].length).trim();
+    return rest ? [document.createElement('hr'), textElement('p', rest)] : [document.createElement('hr')];
+  });
+}
+
 function openIssue(issue) {
   const meta = $('#issue-meta');
   meta.replaceChildren(feedbackTag(issueKind(issue)), textElement('span', `#${issue.number} · ${issue.state === 'closed' ? 'Closed' : 'Open'}`));
   appendProgress(meta, issue);
   $('#issue-heading').textContent = displayTitle(issue.title);
   $('#issue-author').textContent = `Opened by ${issue.user?.login || 'a community member'} · ${dateLabel(issue.created_at)}`;
-  $('#issue-body').textContent = issue.body || 'No additional details were provided.';
+  $('#issue-body').replaceChildren(...formatIssueBody(issue.body));
   $('#issue-replies').textContent = `${issue.comments || 0} ${(issue.comments || 0) === 1 ? 'reply' : 'replies'} on GitHub`;
   $('#issue-github').href = safeIssueUrl(issue);
   $('#issue-dialog').showModal();
@@ -251,7 +266,7 @@ try {
     Object.assign(state, { issues: cached.issues, page: cached.page, hasMore: cached.hasMore, syncedAt: cached.syncedAt, loaded: true });
     renderBoard(); showBoardMessage('');
   }
-} catch { /* A missing or invalid cache is safe to ignore. */ }
+} catch { /* no cache, or unparseable JSON */ }
 if (!state.loaded) loadIssues();
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && Date.now() - (state.syncedAt || 0) > 60000) loadIssues(); });
 
@@ -264,28 +279,28 @@ async function loadRelease() {
     try {
       const cached = JSON.parse(sessionStorage.getItem(key) || 'null');
       if (cached && Date.now() - cached.savedAt < 900000) release = cached.release;
-    } catch { /* Release history remains available without caching. */ }
+    } catch { /* bad cache entry; fetch instead */ }
     if (!release) {
       const response = await fetch(`${API_URL}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' }, signal: controller.signal });
       if (!response.ok) return;
       const data = await response.json();
       if (typeof data.tag_name !== 'string' || !data.tag_name || data.tag_name.length > 80) return;
       release = { tag: data.tag_name };
-      try { sessionStorage.setItem(key, JSON.stringify({ release, savedAt: Date.now() })); } catch { /* Optional cache. */ }
+      try { sessionStorage.setItem(key, JSON.stringify({ release, savedAt: Date.now() })); } catch { /* sessionStorage blocked or full */ }
     }
     if (typeof release.tag !== 'string' || !release.tag || release.tag.length > 80) return;
     $('#release-version').textContent = release.tag;
     $('#release-version').hidden = false;
     $('#release-notes').href = `${REPO_URL}/releases/tag/${encodeURIComponent(release.tag)}`;
     $('#release-notes').textContent = 'What changed? ↗';
-    // A release version is only a hint, never an assumption about the player's install.
+    // Placeholder only. The field stays empty so players type the version they have.
     $('#version').placeholder = `e.g. ${release.tag}, or leave blank`;
-  } catch { /* A network error leaves the direct release-history link in place. */ }
+  } catch { /* offline or rate limited; the Release history link still works */ }
   finally { clearTimeout(timeout); }
 }
 loadRelease();
 
-// Optional browser agent integration stages a draft only; GitHub owns submission.
+// WebMCP hook so a browser agent can fill in the form. It stops short of opening GitHub.
 if (document.modelContext?.registerTool) {
   const lifecycle = new AbortController();
   try {
@@ -306,6 +321,6 @@ if (document.modelContext?.registerTool) {
         return { prepared: true, submitted: false, finalSubmission: 'GitHub' };
       }
     }, { signal: lifecycle.signal })).catch(() => {});
-  } catch { /* Unsupported browser integrations do not affect the page. */ }
+  } catch { /* registerTool threw; the page works without it */ }
   window.addEventListener('pagehide', () => lifecycle.abort(), { once: true });
 }

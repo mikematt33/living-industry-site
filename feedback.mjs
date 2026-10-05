@@ -39,8 +39,8 @@ export function prepareIssue(input) {
   url.searchParams.set('title', title);
   url.searchParams.set('body', body);
   const fullUrl = url.toString();
-  // GitHub's URL-size limit can be exceeded by long or non-ASCII reports.
-  // Keep the complete text available for copy/paste instead of truncating it.
+  // GitHub rejects very long issue URLs, and percent-encoding inflates non-ASCII text.
+  // Past the limit, leave the body out of the link and let the user paste it in.
   if (fullUrl.length > 7000) url.searchParams.delete('body');
   return { title, body, url: url.toString(), copyRequired: fullUrl.length > 7000 };
 }
