@@ -292,7 +292,7 @@ async function loadRelease() {
     $('#release-version').textContent = release.tag;
     $('#release-version').hidden = false;
     $('#release-notes').href = `${REPO_URL}/releases/tag/${encodeURIComponent(release.tag)}`;
-    $('#release-notes').textContent = 'What changed? ↗';
+    $('#release-notes-label').textContent = 'What changed?';
     // Placeholder only. The field stays empty so players type the version they have.
     $('#version').placeholder = `e.g. ${release.tag}, or leave blank`;
   } catch { /* offline or rate limited; the Release history link still works */ }
